@@ -7,12 +7,29 @@ public class Message {
     private String messageType;
     private long timestamp;
 
+    private String rename;
+
+    public String getRename() {
+        return rename;
+    }
+
+    public void setRename(String rename) {
+        this.rename = rename;
+    }
 
     public Message(String id, String content, long timestamp, String messageType) {
         this.id = id;
         this.content = content;
         this.timestamp = timestamp;
         this.messageType = messageType;
+    }
+
+    public Message(String id, String content, String messageType, long timestamp, String rename) {
+        this.id = id;
+        this.content = content;
+        this.messageType = messageType;
+        this.timestamp = timestamp;
+        this.rename = rename;
     }
 
     public String getId() {

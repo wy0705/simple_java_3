@@ -12,17 +12,33 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-
+//实际处理类
 public class MessageHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     public static ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
     public static ConcurrentHashMap<String, ChannelId> channelIdMap = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<String, String> nameMap = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String,String> renameMap=new ConcurrentHashMap<>();
     public static AtomicInteger online = new AtomicInteger();
-
+//接收客户端发送的消息 channel 通道 Read 读 简而言之就是从通道中读取数据，也就是服务端接收客户端发来的数据。但是这个数据在不进行解码时它是ByteBuf类型的
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame webSocketFrame) throws Exception {
+        //通道读取数据，json解码变成Message类型
         Message message = new Gson().fromJson(webSocketFrame.text(), Message.class);
+        //判断message是否修改名字
+        if (message.getRename()!=null){
+            if (renameMap.get(message.getRename())!=null){
+                System.out.println("该用户名已存在");
+            }
+            System.out.println(message.getId()+"改名为："+message.getRename());
+            renameMap.put(message.getRename(),message.getId());
+        }
+        //使用用户名登录
+        if (renameMap.get(message.getId())!=null){
+            message.setId(renameMap.get(message.getId()));
+            System.out.println(message.getId());
+        }
+
         if (message == null) {
             sendMessageByChannel(channelHandlerContext.channel(), new Message(channelHandlerContext.channel().id().asShortText(), "消息错误", System.currentTimeMillis(), MessageType.CHAT_MSG.name()));
             return;
