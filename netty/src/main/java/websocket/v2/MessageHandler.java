@@ -20,6 +20,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<TextWebSocketFra
     public static ConcurrentHashMap<String, String> nameMap = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<String,String> renameMap=new ConcurrentHashMap<>();
     public static AtomicInteger online = new AtomicInteger();
+    private static MessageUtils messageUtils=new MessageUtils();
 //接收客户端发送的消息 channel 通道 Read 读 简而言之就是从通道中读取数据，也就是服务端接收客户端发来的数据。但是这个数据在不进行解码时它是ByteBuf类型的
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame webSocketFrame) throws Exception {
@@ -38,6 +39,9 @@ public class MessageHandler extends SimpleChannelInboundHandler<TextWebSocketFra
             message.setId(renameMap.get(message.getId()));
             System.out.println(message.getId());
         }
+
+        //存储聊天记录
+        messageUtils.addMessage(message);
 
         if (message == null) {
             sendMessageByChannel(channelHandlerContext.channel(), new Message(channelHandlerContext.channel().id().asShortText(), "消息错误", System.currentTimeMillis(), MessageType.CHAT_MSG.name()));
